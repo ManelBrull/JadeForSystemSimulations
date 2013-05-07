@@ -53,7 +53,10 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	private static final int FPS = 60; // animator's target frames per second
 
 	private Texture[] texture; // Place to store the slices of the map
-	int tileSize = 64; // Size of the thile
+	private int tileSize = 64; // Size of the thile
+	
+	private float xAgent = 15.0f;
+	private float yAgent = 15.0f;
 	
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
@@ -143,6 +146,7 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	 */
 	@Override
 	public void display(GLAutoDrawable drawable) {
+		update();
 		GL2 gl = drawable.getGL().getGL2();  // get the OpenGL 2 graphics context
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color and depth buffers
 		gl.glLoadIdentity();  // reset the model-view matrix
@@ -167,7 +171,18 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 				gl.glEnd();
 				actTexture+=1;
 			}
-		}		
+		}
+		texture[3].enable(gl);
+		texture[3].bind(gl);
+		gl.glBegin(GL_TRIANGLES);
+		gl.glTexCoord2f(0.5f, 0.5f);
+		gl.glVertex2d(xAgent+15, yAgent+15);
+		gl.glTexCoord2f(0.0f, 0.0f);
+		gl.glVertex2d(xAgent, yAgent);
+		gl.glTexCoord2f(1.0f, 0.0f);
+		gl.glVertex2d(xAgent+30, yAgent);
+		gl.glEnd();
+		
 	}
 
 	/** 
@@ -175,6 +190,18 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	 */
 	@Override
 	public void dispose(GLAutoDrawable drawable) { }
+	
+	/**
+	 * Update method for our variables
+	 */
+	private void update(){
+		this.xAgent+= 1.0f;
+		this.yAgent+= 1.0f;
+		if(this.xAgent > 400.0f){
+			this.xAgent = 15.0f;
+			this.yAgent = 15.0f;
+		}
+	}
 	
 	/**
 	 * Method for loading slices
