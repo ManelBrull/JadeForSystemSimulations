@@ -57,6 +57,8 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	
 	private float xAgent = 15.0f;
 	private float yAgent = 15.0f;
+	private float xAgent2 = 400.0f;
+	private float yAgent2 = 15.0f;
 	
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
@@ -116,7 +118,7 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 		gl.glDepthFunc(GL_LEQUAL);  // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
 		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
-		this.loadSlices(drawable, "maps/map_1/", TextureIO.PNG, 5);
+		this.loadSlices(drawable, "maps/map_1/", TextureIO.PNG, 6);
 	}
 
 	/**
@@ -172,15 +174,30 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 				actTexture+=1;
 			}
 		}
-		texture[3].enable(gl);
-		texture[3].bind(gl);
-		gl.glBegin(GL_TRIANGLES);
-		gl.glTexCoord2f(0.5f, 0.5f);
-		gl.glVertex2d(xAgent+15, yAgent+15);
+		texture[5].enable(gl);
+		texture[5].bind(gl);
+		gl.glBegin(GL_QUADS);
 		gl.glTexCoord2f(0.0f, 0.0f);
 		gl.glVertex2d(xAgent, yAgent);
 		gl.glTexCoord2f(1.0f, 0.0f);
 		gl.glVertex2d(xAgent+30, yAgent);
+		gl.glTexCoord2f(1.0f, 1.0f);
+		gl.glVertex2d(xAgent+30, yAgent+30);
+		gl.glTexCoord2f(0.0f, 1.0f);
+		gl.glVertex2d(xAgent, yAgent+30);
+		gl.glEnd();
+		
+		texture[5].enable(gl);
+		texture[5].bind(gl);
+		gl.glBegin(GL_QUADS);
+		gl.glTexCoord2f(0.0f, 0.0f);
+		gl.glVertex2d(xAgent2, yAgent2);
+		gl.glTexCoord2f(1.0f, 0.0f);
+		gl.glVertex2d(xAgent2+30, yAgent2);
+		gl.glTexCoord2f(1.0f, 1.0f);
+		gl.glVertex2d(xAgent2+30, yAgent2+30);
+		gl.glTexCoord2f(0.0f, 1.0f);
+		gl.glVertex2d(xAgent2, yAgent2+30);
 		gl.glEnd();
 		
 	}
@@ -195,12 +212,32 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	 * Update method for our variables
 	 */
 	private void update(){
+		if(checkColision()){
+			this.xAgent2+= 3.0f;
+			this.yAgent2-= 3.0f;
+			if(this.xAgent2 < 20.0f){
+				this.xAgent2 = 400.0f;
+				this.yAgent2 = 15.0f;
+			}	
+		}
 		this.xAgent+= 1.0f;
 		this.yAgent+= 1.0f;
 		if(this.xAgent > 400.0f){
 			this.xAgent = 15.0f;
 			this.yAgent = 15.0f;
 		}
+		this.xAgent2-= 1.0f;
+		this.yAgent2+= 1.0f;
+		if(this.xAgent2 < 20.0f){
+			this.xAgent2 = 400.0f;
+			this.yAgent2 = 15.0f;
+		}
+	}
+	
+	private boolean checkColision(){
+		if(xAgent < xAgent2 + 30 && xAgent2 < xAgent + 30 && yAgent < yAgent2 + 30)
+			return yAgent2 < yAgent + 30;
+		return false;
 	}
 	
 	/**
