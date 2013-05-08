@@ -7,5 +7,6 @@
 	<movementMap>MovementMap1</movementMap>
 	<costMap>CostMovementMap1</costMap>
 	<tileMap>TileMap</tileMap>
-  </item>
-</maps> 
+  </map>
+</maps>
+ 

@@ -9,7 +9,6 @@ import static javax.media.opengl.GL.GL_NICEST;
 import static javax.media.opengl.GL.GL_TEXTURE_2D;
 import static javax.media.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static javax.media.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static javax.media.opengl.GL.GL_TRIANGLES;
 import static javax.media.opengl.GL2.GL_QUADS;
 import static javax.media.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
 import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
@@ -33,11 +32,13 @@ import javax.media.opengl.glu.GLU;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import chalmers.manel.jps.JPSTileMap;
+
 import com.jogamp.opengl.util.FPSAnimator;
-// GL constants
-// GL2 constants
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
+// GL constants
+// GL2 constants
 
 /**
  * NeHe Lesson #5: 3D Shapes
@@ -55,14 +56,19 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	private Texture[] texture; // Place to store the slices of the map
 	private int tileSize = 64; // Size of the thile
 	
+	//Agents movements
 	private float xAgent = 15.0f;
 	private float yAgent = 15.0f;
 	private float xAgent2 = 400.0f;
 	private float yAgent2 = 15.0f;
 	
+	//Map which contains all the information
+	JPSTileMap map;
+	
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
+		map = new JPSTileMap("map_1");
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
