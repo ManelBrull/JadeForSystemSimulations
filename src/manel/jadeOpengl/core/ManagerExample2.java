@@ -33,6 +33,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import chalmers.manel.jps.JPSTileMap;
+import chalmers.manel.jps.exceptions.MapNotFoundInMapsInfoXML;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.texture.Texture;
@@ -68,7 +69,12 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
-		map = new JPSTileMap("map_1");
+		try {
+			map = new JPSTileMap(0);
+		} catch (MapNotFoundInMapsInfoXML e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -124,7 +130,7 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 		gl.glDepthFunc(GL_LEQUAL);  // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
 		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
-		this.loadSlices(drawable, "maps/map_1/", TextureIO.PNG, 6);
+		this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG, 6);
 	}
 
 	/**
