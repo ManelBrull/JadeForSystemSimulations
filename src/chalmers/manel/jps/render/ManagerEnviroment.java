@@ -1,4 +1,4 @@
-package manel.jadeOpengl.core;
+package chalmers.manel.jps.render;
 
 import static javax.media.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static javax.media.opengl.GL.GL_DEPTH_BUFFER_BIT;
@@ -32,8 +32,8 @@ import javax.media.opengl.glu.GLU;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import chalmers.manel.jps.JPSTileMap;
 import chalmers.manel.jps.exceptions.MapNotFoundInMapsInfoXML;
+import chalmers.manel.jps.map.JPSTileMap;
 
 import com.jogamp.opengl.util.FPSAnimator;
 import com.jogamp.opengl.util.texture.Texture;
@@ -47,7 +47,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
  * @version May 2012
  */
 @SuppressWarnings("serial")
-public class ManagerExample2 extends Agent implements GLEventListener {
+public class ManagerEnviroment extends Agent implements GLEventListener {
 	// Define constants for the top-level container
 	private static String TITLE = "Tile Map";
 	private static final int CANVAS_WIDTH = 800;  // width of the drawable
@@ -57,58 +57,57 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	private Texture[] texture; // Place to store the slices of the map
 	private int tileSize = 64; // Size of the thile
 	
+	private JPSTileMap myMap; //Map with all the information about the map
+	
 	//Agents movements
 	private float xAgent = 15.0f;
 	private float yAgent = 15.0f;
 	private float xAgent2 = 400.0f;
 	private float yAgent2 = 15.0f;
 	
-	//Map which contains all the information
-	JPSTileMap map;
-	
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		try {
-			map = new JPSTileMap(0);
+			myMap = new JPSTileMap(0);
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					// Create the OpenGL rendering canvas
+					GLCanvas canvas = new GLCanvas();
+					canvas.addGLEventListener(new ManagerEnviroment());
+					canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
+
+					// Create a animator that drives canvas' display() at the specified FPS. 
+					final FPSAnimator animator = new FPSAnimator(canvas, FPS, true);
+
+					// Create the top-level container
+					final JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
+					frame.getContentPane().add(canvas);
+					frame.addWindowListener(new WindowAdapter() {
+						@Override 
+						public void windowClosing(WindowEvent e) {
+							// Use a dedicate thread to run the stop() to ensure that the
+							// animator stops before program exits.
+							new Thread() {
+								@Override 
+								public void run() {
+									if (animator.isStarted()) animator.stop();
+									System.exit(0);
+								}
+							}.start();
+						}
+					});
+					frame.setTitle(TITLE);
+					frame.pack();
+					frame.setVisible(true);
+					animator.start(); // start the animation loop
+				}
+			});
 		} catch (MapNotFoundInMapsInfoXML e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				// Create the OpenGL rendering canvas
-				GLCanvas canvas = new GLCanvas();
-				canvas.addGLEventListener(new ManagerExample2());
-				canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
-
-				// Create a animator that drives canvas' display() at the specified FPS. 
-				final FPSAnimator animator = new FPSAnimator(canvas, FPS, true);
-
-				// Create the top-level container
-				final JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
-				frame.getContentPane().add(canvas);
-				frame.addWindowListener(new WindowAdapter() {
-					@Override 
-					public void windowClosing(WindowEvent e) {
-						// Use a dedicate thread to run the stop() to ensure that the
-						// animator stops before program exits.
-						new Thread() {
-							@Override 
-							public void run() {
-								if (animator.isStarted()) animator.stop();
-								System.exit(0);
-							}
-						}.start();
-					}
-				});
-				frame.setTitle(TITLE);
-				frame.pack();
-				frame.setVisible(true);
-				animator.start(); // start the animation loop
-			}
-		});
 	}
 
 	// Setup OpenGL Graphics Renderer
@@ -121,6 +120,7 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
+		this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG);
 		GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
 		glu = new GLU();                         // get GL Utilities
 		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
@@ -130,7 +130,6 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 		gl.glDepthFunc(GL_LEQUAL);  // the type of depth test to do
 		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
 		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
-		this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG, 6);
 	}
 
 	/**
@@ -255,8 +254,10 @@ public class ManagerExample2 extends Agent implements GLEventListener {
 	/**
 	 * Method for loading slices
 	 */
-	private void loadSlices(GLAutoDrawable drawable, String path, String textureFileType, int num){
+	private void loadSlices(GLAutoDrawable drawable, String path, String textureFileType){
 		GL2 gl = drawable.getGL().getGL2();
+		System.out.println("Num tiles in loadSlices: " + myMap.getNumTiles());
+		int num = myMap.getNumTiles();
 		this.texture = new Texture[num];
 		for(int i = 0; i < num; i++){
 			InputStream is = getClass().getClassLoader().getResourceAsStream(path+"tile"+i+"."+textureFileType);
