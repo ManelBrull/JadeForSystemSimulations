@@ -45,11 +45,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
 // GL constants
 // GL2 constants
 
-/**
- * NeHe Lesson #5: 3D Shapes
- * @author Hock-Chuan Chua
- * @version May 2012
- */
+
 @SuppressWarnings("serial")
 public class ManagerEnviroment extends Agent implements GLEventListener {
 	// Define constants for the top-level container
@@ -77,7 +73,7 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 		// Run the GUI codes in the event-dispatching thread for thread safety
 		this.numAgents = 2;
 		this.xPosAgent = new float[this.numAgents]; 
-		this.yPosAgent = new float[this.numAgents];;
+		this.yPosAgent = new float[this.numAgents];
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -129,9 +125,9 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 		try {
 			//Load map
 			this.myMap = new JPSTileMap(0);
-			//Retrieve all the agents
 
 			this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG);
+		
 			GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
 			glu = new GLU();                         // get GL Utilities
 			gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
@@ -142,11 +138,7 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 			gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
 			gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
 		} catch (MapNotFoundInMapsInfoXML e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-	/*	} catch (FIPAException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();*/
 		}
 	}
 
@@ -182,14 +174,16 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 		gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear color and depth buffers
 		gl.glLoadIdentity();  // reset the model-view matrix
 		gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GLU.GLU_FILL);
+		
 		int actTexture = 0;
-		for(int y = 0; y < 7; y++){
-			for(int x = 0; x < 7; x++){
-				if(actTexture == 5) actTexture = 0;
+		// We have to chek that y is for width
+		for(int y = 0; y < myMap.getWidthTiles(); y++){
+			for(int x = 0; x < myMap.getHeightTiles(); x++){
+				actTexture = myMap.getRenderTiles(y, x);
 				texture[actTexture].enable(gl);
 				texture[actTexture].bind(gl);
-				int pixelX=x*tileSize;
-				int pixelY=y*tileSize;
+				int pixelX=x*myMap.getSizeTile();
+				int pixelY=y*myMap.getSizeTile();
 				gl.glBegin(GL_QUADS);
 				gl.glTexCoord2f(0.0f,1.0f);
 				gl.glVertex2f(pixelX,pixelY);
@@ -200,7 +194,6 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 				gl.glTexCoord2f(0.0f,0.0f);
 				gl.glVertex2f(pixelX,pixelY+tileSize);
 				gl.glEnd();
-				actTexture+=1;
 			}
 		}
 		

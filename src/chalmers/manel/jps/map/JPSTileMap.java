@@ -153,7 +153,7 @@ public class JPSTileMap {
                 	if(t == 10 || t == 13) 
                 		tPos--;
                 	else
-                		costWalk[tPos]=t-48;
+                		renderTiles[tPos]=t-48;
                 	if (t-48 > this.numTiles)
                 		this.numTiles = t-48;
                 	tPos++;
@@ -197,6 +197,11 @@ public class JPSTileMap {
 	public boolean getCanWalk(int row, int col) {
 		return canWalk[matToVecPos(row, col)];
 	}
+	public boolean getCanWalkPixels(float row, float col){
+		int x = (int) (row/this.getSizeTile());
+		int y = (int) (col/this.getSizeTile());
+		return getCanWalk(x, y);
+	}
 
 	public int getCostWalk(int position) {
 		return costWalk[position];
@@ -210,6 +215,10 @@ public class JPSTileMap {
 		return renderTiles[position];
 	}
 
+	public int getRenderTiles(int row, int col) {
+		return renderTiles[matToVecPos(row, col)];
+	}
+	
 	public int getNumTiles() {
 		return numTiles;
 	}
