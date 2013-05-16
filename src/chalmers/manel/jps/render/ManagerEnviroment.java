@@ -50,14 +50,17 @@ import com.jogamp.opengl.util.texture.TextureIO;
 public class ManagerEnviroment extends Agent implements GLEventListener {
 	// Define constants for the top-level container
 	private static String TITLE = "Tile Map";
-	private static final int CANVAS_WIDTH = 800;  // width of the drawable
-	private static final int CANVAS_HEIGHT = 600; // height of the drawable
+	private static int CANVAS_WIDTH = 448;  // width of the drawable
+	private static int CANVAS_HEIGHT = 448; // height of the drawable
 	private static final int FPS = 60; // animator's target frames per second
 
 	private Texture[] texture; // Place to store the slices of the map
 	private int tileSize = 64; // Size of the thile
 	
-	private JPSTileMap myMap; //Map with all the information about the map
+	public JPSTileMap myMap; //Map with all the information about the map
+	
+	public static float xPosAgent[] = new float [2];
+	public static float yPosAgent[] = new float [2];
 	
 	//Agents movements
 	private float xAgent = 15.0f;
@@ -68,48 +71,43 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
-		try {
-			myMap = new JPSTileMap(0);
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					// Create the OpenGL rendering canvas
-					GLCanvas canvas = new GLCanvas();
-					canvas.addGLEventListener(new ManagerEnviroment());
-					canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				// Create the OpenGL rendering canvas
+				GLCanvas canvas = new GLCanvas();
+				canvas.addGLEventListener(new ManagerEnviroment());
+				canvas.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
 
-					// Create a animator that drives canvas' display() at the specified FPS. 
-					final FPSAnimator animator = new FPSAnimator(canvas, FPS, true);
+				// Create a animator that drives canvas' display() at the specified FPS. 
+				final FPSAnimator animator = new FPSAnimator(canvas, FPS, true);
 
-					// Create the top-level container
-					final JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
-					frame.getContentPane().add(canvas);
-					frame.addWindowListener(new WindowAdapter() {
-						@Override 
-						public void windowClosing(WindowEvent e) {
-							// Use a dedicate thread to run the stop() to ensure that the
-							// animator stops before program exits.
-							new Thread() {
-								@Override 
-								public void run() {
-									if (animator.isStarted()) animator.stop();
-									System.exit(0);
-								}
-							}.start();
-						}
-					});
-					frame.setTitle(TITLE);
-					frame.pack();
-					frame.setVisible(true);
-					animator.start(); // start the animation loop
-				}
-			});
-		} catch (MapNotFoundInMapsInfoXML e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+				// Create the top-level container
+				final JFrame frame = new JFrame(); // Swing's JFrame or AWT's Frame
+				frame.getContentPane().add(canvas);
+				frame.addWindowListener(new WindowAdapter() {
+					@Override 
+					public void windowClosing(WindowEvent e) {
+						// Use a dedicate thread to run the stop() to ensure that the
+						// animator stops before program exits.
+						new Thread() {
+							@Override 
+							public void run() {
+								if (animator.isStarted()) animator.stop();
+								System.exit(0);
+							}
+						}.start();
+					}
+				});
+				frame.setTitle(TITLE);
+				frame.pack();
+				frame.setVisible(true);
+				animator.start(); // start the animation loop
+			}
+		});
+
 	}
-
+	
 	// Setup OpenGL Graphics Renderer
 	private GLU glu;  // for the GL Utility
 	// ------ Implement methods declared in GLEventListener ------
@@ -120,16 +118,22 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	 */
 	@Override
 	public void init(GLAutoDrawable drawable) {
-		this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG);
-		GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
-		glu = new GLU();                         // get GL Utilities
-		gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
-		gl.glClearDepth(1.0f);      // set clear depth value to farthest
-		gl.glEnable(GL_DEPTH_TEST); // enables depth testing
-		gl.glEnable(GL_TEXTURE_2D);
-		gl.glDepthFunc(GL_LEQUAL);  // the type of depth test to do
-		gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
-		gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
+		try {
+			this.myMap = new JPSTileMap(0);
+			this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG);
+			GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
+			glu = new GLU();                         // get GL Utilities
+			gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // set background (clear) color
+			gl.glClearDepth(1.0f);      // set clear depth value to farthest
+			gl.glEnable(GL_DEPTH_TEST); // enables depth testing
+			gl.glEnable(GL_TEXTURE_2D);
+			gl.glDepthFunc(GL_LEQUAL);  // the type of depth test to do
+			gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // best perspective correction
+			gl.glShadeModel(GL_SMOOTH); // blends colors nicely, and smoothes out lighting
+		} catch (MapNotFoundInMapsInfoXML e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -256,8 +260,8 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	 */
 	private void loadSlices(GLAutoDrawable drawable, String path, String textureFileType){
 		GL2 gl = drawable.getGL().getGL2();
-		System.out.println("Num tiles in loadSlices: " + myMap.getNumTiles());
-		int num = myMap.getNumTiles();
+		System.out.println("Num tiles in loadSlices: " + this.myMap.getNumTiles());
+		int num = this.myMap.getNumTiles()+2;
 		this.texture = new Texture[num];
 		for(int i = 0; i < num; i++){
 			InputStream is = getClass().getClassLoader().getResourceAsStream(path+"tile"+i+"."+textureFileType);
