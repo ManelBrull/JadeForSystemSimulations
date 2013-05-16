@@ -16,6 +16,7 @@ public class particle2 extends basicParticle {
 		
 		ManagerEnviroment.xPosAgent[1] = 400.0f;
 		ManagerEnviroment.yPosAgent[1] = 15.0f;
+		ManagerEnviroment.sizeAgent[1] = 32.0f;
 	}
 
 	@Override

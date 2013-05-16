@@ -59,21 +59,21 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	
 	public static JPSTileMap myMap; //Map with all the information about the map
 	
-	 //Agent positions
+	//Agent information
 	private static int numAgents;
 	public static float xPosAgent[] = null; 
 	public static float yPosAgent[] = null;
-
-	//Agent
-	AMSAgentDescription [] agents = null;
+	public static float sizeAgent[] = null;
 	
 	
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
+		//Initialize for everything agents need
 		this.numAgents = 2;
 		this.xPosAgent = new float[this.numAgents]; 
 		this.yPosAgent = new float[this.numAgents];
+		this.sizeAgent = new float[this.numAgents];
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -198,17 +198,18 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 		}
 		
 		for(int i = 0; i < this.numAgents; i++){
+			float d = (float) (sizeAgent[i]/2.0);
 			texture[5].enable(gl);
 			texture[5].bind(gl);
 			gl.glBegin(GL_QUADS);
 			gl.glTexCoord2f(0.0f, 0.0f);
-			gl.glVertex2d(xPosAgent[i], yPosAgent[i]);
+			gl.glVertex2d(xPosAgent[i]-d, yPosAgent[i]-d);
 			gl.glTexCoord2f(1.0f, 0.0f);
-			gl.glVertex2d(xPosAgent[i]+30, yPosAgent[i]);
+			gl.glVertex2d(xPosAgent[i]+d, yPosAgent[i]-d);
 			gl.glTexCoord2f(1.0f, 1.0f);
-			gl.glVertex2d(xPosAgent[i]+30, yPosAgent[i]+30);
+			gl.glVertex2d(xPosAgent[i]+d, yPosAgent[i]+d);
 			gl.glTexCoord2f(0.0f, 1.0f);
-			gl.glVertex2d(xPosAgent[i], yPosAgent[i]+30);
+			gl.glVertex2d(xPosAgent[i]-d, yPosAgent[i]+d);
 			gl.glEnd();
 		}
 
