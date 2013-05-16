@@ -15,6 +15,10 @@ import static javax.media.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_MODELVIEW;
 import static javax.media.opengl.fixedfunc.GLMatrixFunc.GL_PROJECTION;
 import jade.core.Agent;
+import jade.domain.AMSService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.AMSAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
 
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
@@ -57,20 +61,24 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	private Texture[] texture; // Place to store the slices of the map
 	private int tileSize = 64; // Size of the thile
 	
-	public JPSTileMap myMap; //Map with all the information about the map
+	public static JPSTileMap myMap; //Map with all the information about the map
 	
-	public static float xPosAgent[] = new float [2];
-	public static float yPosAgent[] = new float [2];
+	 //Agent positions
+	private static int numAgents;
+	public static float xPosAgent[] = null; 
+	public static float yPosAgent[] = null;
+
+	//Agent
+	AMSAgentDescription [] agents = null;
 	
-	//Agents movements
-	private float xAgent = 15.0f;
-	private float yAgent = 15.0f;
-	private float xAgent2 = 400.0f;
-	private float yAgent2 = 15.0f;
 	
 	/** The entry main() method to setup the top-level container and animator */
 	protected void setup() {
 		// Run the GUI codes in the event-dispatching thread for thread safety
+		this.numAgents = 2;
+		this.xPosAgent = new float[this.numAgents]; 
+		this.yPosAgent = new float[this.numAgents];;
+		
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -119,7 +127,10 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		try {
+			//Load map
 			this.myMap = new JPSTileMap(0);
+			//Retrieve all the agents
+
 			this.loadSlices(drawable, "maps/map_0/", TextureIO.PNG);
 			GL2 gl = drawable.getGL().getGL2();      // get the OpenGL graphics context
 			glu = new GLU();                         // get GL Utilities
@@ -133,6 +144,9 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 		} catch (MapNotFoundInMapsInfoXML e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+	/*	} catch (FIPAException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();*/
 		}
 	}
 
@@ -189,32 +203,22 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 				actTexture+=1;
 			}
 		}
-		texture[5].enable(gl);
-		texture[5].bind(gl);
-		gl.glBegin(GL_QUADS);
-		gl.glTexCoord2f(0.0f, 0.0f);
-		gl.glVertex2d(xAgent, yAgent);
-		gl.glTexCoord2f(1.0f, 0.0f);
-		gl.glVertex2d(xAgent+30, yAgent);
-		gl.glTexCoord2f(1.0f, 1.0f);
-		gl.glVertex2d(xAgent+30, yAgent+30);
-		gl.glTexCoord2f(0.0f, 1.0f);
-		gl.glVertex2d(xAgent, yAgent+30);
-		gl.glEnd();
 		
-		texture[5].enable(gl);
-		texture[5].bind(gl);
-		gl.glBegin(GL_QUADS);
-		gl.glTexCoord2f(0.0f, 0.0f);
-		gl.glVertex2d(xAgent2, yAgent2);
-		gl.glTexCoord2f(1.0f, 0.0f);
-		gl.glVertex2d(xAgent2+30, yAgent2);
-		gl.glTexCoord2f(1.0f, 1.0f);
-		gl.glVertex2d(xAgent2+30, yAgent2+30);
-		gl.glTexCoord2f(0.0f, 1.0f);
-		gl.glVertex2d(xAgent2, yAgent2+30);
-		gl.glEnd();
-		
+		for(int i = 0; i < this.numAgents; i++){
+			texture[5].enable(gl);
+			texture[5].bind(gl);
+			gl.glBegin(GL_QUADS);
+			gl.glTexCoord2f(0.0f, 0.0f);
+			gl.glVertex2d(xPosAgent[i], yPosAgent[i]);
+			gl.glTexCoord2f(1.0f, 0.0f);
+			gl.glVertex2d(xPosAgent[i]+30, yPosAgent[i]);
+			gl.glTexCoord2f(1.0f, 1.0f);
+			gl.glVertex2d(xPosAgent[i]+30, yPosAgent[i]+30);
+			gl.glTexCoord2f(0.0f, 1.0f);
+			gl.glVertex2d(xPosAgent[i], yPosAgent[i]+30);
+			gl.glEnd();
+		}
+
 	}
 
 	/** 
@@ -228,30 +232,22 @@ public class ManagerEnviroment extends Agent implements GLEventListener {
 	 */
 	private void update(){
 		if(checkColision()){
-			this.xAgent2+= 3.0f;
-			this.yAgent2-= 3.0f;
-			if(this.xAgent2 < 20.0f){
-				this.xAgent2 = 400.0f;
-				this.yAgent2 = 15.0f;
-			}	
+			this.xPosAgent[1]+= 3.0f;
+			this.yPosAgent[1]-= 3.0f;
 		}
-		this.xAgent+= 1.0f;
-		this.yAgent+= 1.0f;
-		if(this.xAgent > 400.0f){
-			this.xAgent = 15.0f;
-			this.yAgent = 15.0f;
+		if(this.xPosAgent[0] > 400.0f){
+			this.xPosAgent[0] = 15.0f;
+			this.yPosAgent[0] = 15.0f;
 		}
-		this.xAgent2-= 1.0f;
-		this.yAgent2+= 1.0f;
-		if(this.xAgent2 < 20.0f){
-			this.xAgent2 = 400.0f;
-			this.yAgent2 = 15.0f;
+		if(this.xPosAgent[1] < 20.0f){
+			this.xPosAgent[1] = 400.0f;
+			this.yPosAgent[1] = 15.0f;
 		}
 	}
 	
 	private boolean checkColision(){
-		if(xAgent < xAgent2 + 30 && xAgent2 < xAgent + 30 && yAgent < yAgent2 + 30)
-			return yAgent2 < yAgent + 30;
+		if(xPosAgent[0] < xPosAgent[1] + 30 && xPosAgent[1] < xPosAgent[0] + 30 && yPosAgent[0] < yPosAgent[1] + 30)
+			return yPosAgent[1] < yPosAgent[0] + 30;
 		return false;
 	}
 	
